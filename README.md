@@ -6,6 +6,7 @@ The application will also automatically unzip RAR and ZIP files and supports com
 
 ## Usage:
 - Python is required for this to work
+- Then install the required library via `pip install rarfile` in the command-line
 - You may simply run the Python file e.g by double clicking the file and you will be prompted to enter 2 directories, one to copy FROM and the other to copy TO
 - You can also run the Python file via the command line and supply system arguments
 - To run via the command line, cd to the directory of the Python file. Then use `py ./sort-files-by-extension.py` and supply optional parameters (see screenshots below)
