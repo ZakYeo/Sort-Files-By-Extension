@@ -1,5 +1,8 @@
 # Sort-Files-By-Extension
-Input an old directory and a new directory to recursively loop through the old directory and sorts each file into their own folders based on the file's extension in the new directory.
+Takes two inputs: directory to copy FROM and a directory to copy TO.
+This application will recursively loop through the directory to copy FROM and copy every file into the copy TO directory.
+Every file copied into the copy TO directory is sorted by file extension in their respective folder.
+The application will also automatically unzip RAR and ZIP files and supports command-line parameters through Python's sys.argv functionality
 
 Usage:
 - Python is required for this to work
