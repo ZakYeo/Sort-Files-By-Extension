@@ -24,20 +24,27 @@ def loop_copy(old_path, new_path, shouldExtract=True, move=False):
             if(shouldExtract):
                 # Check for zip or rar file
                 if(is_rarfile(filepath)):
+                    print(
+                        f"Handling RAR file {filename} moving to {temp_path}")
                     handle_rar(new_path, filepath, temp_path)
                     continue
                 elif(is_zipfile(filepath)):
+                    print(
+                        f"Handling ZIP file {filename} moving to {temp_path}")
                     handle_zip(new_path, filepath, temp_path)
                     continue
-                if not os.path.exists(new_dir):
-                    # Create the directory if it doesn't exist
-                    os.makedirs(new_dir)
+            if not os.path.exists(new_dir):
+                # Create the directory if it doesn't exist
+                print(f"Creating directory {new_dir}")
+                os.makedirs(new_dir)
 
             # File is not zip or rar, so handle like a normal file
             # Move the file or copy the file depending on parameters
             if move:
+                print(f"Moving {filename} into {new_dir}")
                 safe_copy_or_move(filepath, new_dir, copy=False)
             else:
+                print(f"Copying {filename} into {new_dir}")
                 safe_copy_or_move(filepath, new_dir, copy=True)
     # Delete temp folder if it exists
     if(os.path.exists(temp_path)):
@@ -123,12 +130,13 @@ if __name__ == '__main__' and len(argv) == 1:
     else:
         extract = True
     check_paths(old_path, new_path)
+    print("Copying Please Wait...")
     loop_copy(old_path, new_path, shouldExtract=extract)
     print("Success!")
 elif __name__ == '__main__' and len(argv) > 1:
     old_path = argv[1]
     if("--h" in old_path):
-        print(show_help)
+        print(show_help())
         exit()
     try:
         new_path = argv[2]
@@ -150,9 +158,12 @@ elif __name__ == '__main__' and len(argv) > 1:
         pass
     if "--h" in [param1, param2]:
         print(show_help())
+        exit()
     if "--e" in [param1, param2]:
         shouldExtract = False
     if "--m" in [param1, param2]:
         shouldMove = True
 
+    print("Copying Please Wait...")
     loop_copy(old_path, new_path, shouldExtract=shouldExtract, move=shouldMove)
+    print("Success!")
