@@ -4,9 +4,6 @@ from zipfile import ZipFile, is_zipfile
 from rarfile import RarFile, is_rarfile
 from sys import argv
 
-# C:\Users\zakye\Desktop\work\Personal\for dad
-# C:\Users\zakye\Desktop\work\Personal\test
-
 
 def loop_copy(old_path, new_path, shouldExtract=True, move=False):
     """
