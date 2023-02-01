@@ -14,3 +14,23 @@ The application will also automatically unzip RAR and ZIP files and supports com
 - `--h` -> Help Screen <br>
 - `--e` -> Set this to NOT extract ZIP or RARs<br>
 - `--m` -> Set this to MOVE files rather than COPY<br>
+
+## Images
+This image shows execution of the application supplying 2 sysargv arguments: copyFROM path & copyTO path. It automatically extracts the ZIP&RAR contents from copyFROM and places them into their corresponding folder (this case .txt) into the copyTO folder
+<img
+  src="/images/image_1.png"
+  alt="Image 1 of application"
+  title="Image 1 of application"
+  style="display: inline-block; margin: 0 auto; width: 100%; height: 100%;"> <br>
+This image shows the --h parameter output
+<img
+  src="/images/image_2.png"
+  alt="Image 2 of application"
+  title="Image 2 of application"
+  style="display: inline-block; margin: 0 auto; width: 100%; height: 100%;"><br>
+This image displays the execution of the application supplying 4 sysargv arguments
+<img
+  src="/images/image_3.png"
+  alt="Image 3 of application"
+  title="Image 3 of application"
+  style="display: inline-block; margin: 0 auto; width: 100%; height: 100%;">
