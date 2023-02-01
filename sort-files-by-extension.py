@@ -132,8 +132,8 @@ elif __name__ == '__main__' and len(argv) > 1:
         exit()
     try:
         new_path = argv[2]
-    except KeyError:
-        raise Exception(
+    except IndexError:
+        raise IndexError(
             "Please supply two paths: one to copy FROM and one to copy TO")
     param1 = ""
     param2 = ""
@@ -142,11 +142,11 @@ elif __name__ == '__main__' and len(argv) > 1:
     shouldMove = False
     try:
         param1 = argv[3]
-    except KeyError:
+    except IndexError:
         pass
     try:
         param2 = argv[4]
-    except KeyError:
+    except IndexError:
         pass
     if "--h" in [param1, param2]:
         print(show_help())
