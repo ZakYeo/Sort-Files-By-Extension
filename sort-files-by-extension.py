@@ -1,7 +1,7 @@
 import os
 import shutil
-from zipfile import ZipFile, is_zipfile
-from rarfile import RarFile, is_rarfile
+from zipfile import ZipFile, is_zipfile, BadZipFile
+from rarfile import RarFile, is_rarfile, BadRarFile
 from sys import argv
 
 
@@ -37,15 +37,23 @@ def loop_copy(old_path, new_path, shouldExtract=True, move=False, folderCap=0, f
                 if(is_rarfile(filepath)):
                     print(
                         f"Handling RAR file {filename} moving to {temp_path}")
-                    handle_rar(new_path, filepath, temp_path,
-                               folderCap, filecounts, folderCapNumbers)
-                    continue
+                    success = handle_rar(new_path, filepath, temp_path,
+                                         folderCap, filecounts, folderCapNumbers)
+                    if success:
+                        continue
+                    else:
+                        print(
+                            f"Bad Rar File / could not extract file: {filepath}. Moving or Copying instead")
                 elif(is_zipfile(filepath)):
                     print(
                         f"Handling ZIP file {filename} moving to {temp_path}")
-                    handle_zip(new_path, filepath, temp_path,
-                               folderCap, filecounts, folderCapNumbers)
-                    continue
+                    success = handle_zip(new_path, filepath, temp_path,
+                                         folderCap, filecounts, folderCapNumbers)
+                    if success:
+                        continue
+                    else:
+                        print(
+                            f"Bad Zip File / could not extract file: {filepath}. Moving or Copying instead")
             if not os.path.exists(new_dir):
                 # Create the directory if it doesn't exist
                 print(f"Creating directory {new_dir}")
@@ -113,13 +121,17 @@ def handle_rar(new_path, filepath, temp_path, folderCap=0, filecounts={}, folder
     Opens and extracts all from the specified rarfile into the temp_path given
     Then calls loop_copy function on the temporary path to place the extracted files into the corresponding folders
     """
-    with RarFile(filepath, 'r') as obj:
-        if not os.path.exists(temp_path):
-            os.makedirs(temp_path)
-        obj.extractall(path=temp_path)
+    try:
+        with RarFile(filepath, 'r') as obj:
+            if not os.path.exists(temp_path):
+                os.makedirs(temp_path)
+            obj.extractall(path=temp_path)
+    except BadRarFile:
+        return False  # Fail
 
     loop_copy(temp_path, new_path, move, folderCap=folderCap,
               filecounts=filecounts, folderCapNumbers=folderCapNumbers)
+    return True  # Success
 
 
 def handle_zip(new_path, filepath, temp_path, folderCap=0, filecounts={}, folderCapNumbers={}, move=True):
@@ -127,12 +139,16 @@ def handle_zip(new_path, filepath, temp_path, folderCap=0, filecounts={}, folder
     Opens and extracts all from the specified zipfile into the temp_path given
     Then calls loop_copy function on the temporary path to place the extracted files into the corresponding folders
     """
-    with ZipFile(filepath, 'r') as obj:
-        if not os.path.exists(temp_path):
-            os.makedirs(temp_path)
-        obj.extractall(path=temp_path)
+    try:
+        with ZipFile(filepath, 'r') as obj:
+            if not os.path.exists(temp_path):
+                os.makedirs(temp_path)
+            obj.extractall(path=temp_path)
+    except BadZipFile:
+        return False  # Fail
     loop_copy(temp_path, new_path, move, folderCap=folderCap,
               filecounts=filecounts, folderCapNumbers=folderCapNumbers)
+    return True  # Success
 
 
 def check_paths(old_path, new_path):
