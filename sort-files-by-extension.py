@@ -5,19 +5,30 @@ from rarfile import RarFile, is_rarfile
 from sys import argv
 
 
-def loop_copy(old_path, new_path, shouldExtract=True, move=False):
+def loop_copy(old_path, new_path, shouldExtract=True, move=False, folderCap=0, filecounts={}, folderCapNumbers={}):
     """
     Loop through the old_path and create a new folder for every file extension found
     Place each file with the corresponding file extension into the correct newly created folder
     Can unzip archived files and place them into the correct folders too
     """
     for root, dirs, files in os.walk(old_path):
+        filecounts = filecounts
+        folderCapNumbers = folderCapNumbers
         for file in files:
             filename, fileext = os.path.splitext(file)
             # Path to file we are currently handling
             filepath = fr"{root}\{file}"
             # Path to directory we will copy TO
             new_dir = fr"{new_path}\{fileext}"
+            # Check if folder cap supplied
+            if folderCap > 0:
+                # If folder cap supplied, grab the number we are on
+                try:
+                    new_dir = fr"{new_path}\{fileext}\{folderCapNumbers[fileext]}"
+                except KeyError:
+                    # Number does not exist, begin at folder number 1
+                    folderCapNumbers[fileext] = 1
+                    new_dir = fr"{new_path}\{fileext}\{folderCapNumbers[fileext]}"
             # Temp path used for unzipped archives
             temp_path = fr"{new_path}\temp"
 
@@ -26,12 +37,14 @@ def loop_copy(old_path, new_path, shouldExtract=True, move=False):
                 if(is_rarfile(filepath)):
                     print(
                         f"Handling RAR file {filename} moving to {temp_path}")
-                    handle_rar(new_path, filepath, temp_path)
+                    handle_rar(new_path, filepath, temp_path,
+                               folderCap, filecounts, folderCapNumbers)
                     continue
                 elif(is_zipfile(filepath)):
                     print(
                         f"Handling ZIP file {filename} moving to {temp_path}")
-                    handle_zip(new_path, filepath, temp_path)
+                    handle_zip(new_path, filepath, temp_path,
+                               folderCap, filecounts, folderCapNumbers)
                     continue
             if not os.path.exists(new_dir):
                 # Create the directory if it doesn't exist
@@ -43,9 +56,23 @@ def loop_copy(old_path, new_path, shouldExtract=True, move=False):
             if move:
                 print(f"Moving {filename} into {new_dir}")
                 safe_copy_or_move(filepath, new_dir, copy=False)
+                try:
+                    filecounts[fileext] += 1
+                except KeyError:
+                    filecounts[fileext] = 1
             else:
                 print(f"Copying {filename} into {new_dir}")
                 safe_copy_or_move(filepath, new_dir, copy=True)
+                try:
+                    filecounts[fileext] += 1
+                except KeyError:
+                    filecounts[fileext] = 1
+            # Check if folder cap supplied, if so, check if the number of files has reached the cap
+            if(folderCap > 0 and filecounts[fileext] >= folderCap):
+                # Reached the cap, create new folder and reset file count
+                folderCapNumbers[fileext] += 1
+                filecounts[fileext] = 0
+
     # Delete temp folder if it exists
     if(os.path.exists(temp_path)):
         shutil.rmtree(temp_path)
@@ -81,7 +108,7 @@ def safe_copy_or_move(file_path, out_dir, copy=True, dst=None):
                 out_dir, '{}_{}{}'.format(base, i, extension)))
 
 
-def handle_rar(new_path, filepath, temp_path, move=True):
+def handle_rar(new_path, filepath, temp_path, folderCap=0, filecounts={}, folderCapNumbers={}, move=True):
     """
     Opens and extracts all from the specified rarfile into the temp_path given
     Then calls loop_copy function on the temporary path to place the extracted files into the corresponding folders
@@ -91,10 +118,11 @@ def handle_rar(new_path, filepath, temp_path, move=True):
             os.makedirs(temp_path)
         obj.extractall(path=temp_path)
 
-    loop_copy(temp_path, new_path, move)
+    loop_copy(temp_path, new_path, move, folderCap=folderCap,
+              filecounts=filecounts, folderCapNumbers=folderCapNumbers)
 
 
-def handle_zip(new_path, filepath, temp_path, move=True):
+def handle_zip(new_path, filepath, temp_path, folderCap=0, filecounts={}, folderCapNumbers={}, move=True):
     """
     Opens and extracts all from the specified zipfile into the temp_path given
     Then calls loop_copy function on the temporary path to place the extracted files into the corresponding folders
@@ -103,7 +131,8 @@ def handle_zip(new_path, filepath, temp_path, move=True):
         if not os.path.exists(temp_path):
             os.makedirs(temp_path)
         obj.extractall(path=temp_path)
-    loop_copy(temp_path, new_path, move)
+    loop_copy(temp_path, new_path, move, folderCap=folderCap,
+              filecounts=filecounts, folderCapNumbers=folderCapNumbers)
 
 
 def check_paths(old_path, new_path):
@@ -117,7 +146,8 @@ def show_help():
     return """Parameters are:
 --h -> Help Screen
 --e -> Set this to NOT extract ZIP or RARs
---m -> Set this to MOVE files rather than COPY"""
+--m -> Set this to MOVE files rather than COPY
+--c [number] -> Supply this number to give a maximum amount of files in a folder before creating a new one"""
 
 
 if __name__ == '__main__' and len(argv) == 1:
@@ -143,8 +173,11 @@ elif __name__ == '__main__' and len(argv) > 1:
     except IndexError:
         raise IndexError(
             "Please supply two paths: one to copy FROM and one to copy TO")
+    folderCap = 0
     param1 = ""
     param2 = ""
+    param3 = ""
+    param4 = ""
     check_paths(old_path, new_path)
     shouldExtract = True
     shouldMove = False
@@ -156,14 +189,33 @@ elif __name__ == '__main__' and len(argv) > 1:
         param2 = argv[4]
     except IndexError:
         pass
-    if "--h" in [param1, param2]:
+
+    try:
+        param3 = argv[5]
+    except IndexError:
+        pass
+
+    try:
+        param4 = argv[6]
+    except IndexError:
+        pass
+
+    print([param1, param2, param3, param4])
+    # Check parameters
+    if "--h" in [param1, param2, param3, param4]:
         print(show_help())
         exit()
-    if "--e" in [param1, param2]:
+    if "--e" in [param1, param2, param3, param4]:
         shouldExtract = False
-    if "--m" in [param1, param2]:
+    if "--m" in [param1, param2, param3, param4]:
         shouldMove = True
-
+    if "--c" in param1:
+        folderCap = int(param2)
+    elif "--c" in param2:
+        folderCap = int(param3)
+    elif "--c" in param3:
+        folderCap = int(param4)
     print("Copying Please Wait...")
-    loop_copy(old_path, new_path, shouldExtract=shouldExtract, move=shouldMove)
+    loop_copy(old_path, new_path, shouldExtract=shouldExtract,
+              move=shouldMove, folderCap=folderCap)
     print("Success!")
