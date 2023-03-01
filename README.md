@@ -6,9 +6,10 @@ The application will also automatically unzip RAR and ZIP files and supports com
 
 ## Usage:
 - Python is required for this to work
+- Then install the required library via `pip install rarfile` in the command-line
 - You may simply run the Python file e.g by double clicking the file and you will be prompted to enter 2 directories, one to copy FROM and the other to copy TO
 - You can also run the Python file via the command line and supply system arguments
-- To run via the command line, cd to the directory of the Python file. Then use `py ./sort-files-by-extension.py` and supply optional parameters
+- To run via the command line, cd to the directory of the Python file. Then use `py ./sort-files-by-extension.py` and supply optional parameters (see screenshots below)
 
 ## Parameters to supply using sys.argv:
 - `--h` -> Help Screen <br>
@@ -33,4 +34,10 @@ This image displays the execution of the application supplying 4 sysargv argumen
   src="/images/image_3.png"
   alt="Image 3 of application"
   title="Image 3 of application"
-  style="display: inline-block; margin: 0 auto; width: 100%; height: 100%;">
+  style="display: inline-block; margin: 0 auto; width: 100%; height: 100%;"><br>
+This image shows what happens if you run the application normally without supplying sysargv arguments:
+<img
+  src="/images/image_4.png"
+  alt="Image 4 of application"
+  title="Image 4 of application"
+  style="display: inline-block; margin: 0 auto; width: 100%; height: 100%;"><br>
