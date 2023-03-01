@@ -15,6 +15,7 @@ The application will also automatically unzip RAR and ZIP files and supports com
 - `--h` -> Help Screen <br>
 - `--e` -> Set this to NOT extract ZIP or RARs<br>
 - `--m` -> Set this to MOVE files rather than COPY<br>
+- `--c x` -> Where `x` represents an integer. Set this to further split the files into subfolders of size `x`. e.g Supplying `2` will mean any files sorted will create an extra sub-folder that contains up to `x` files. Implemented to prevent the creation of VERY large directories.
 
 ## Images
 This image shows execution of the application supplying 2 sysargv arguments: copyFROM path & copyTO path. It automatically extracts the ZIP&RAR contents from copyFROM and places them into their corresponding folder (this case .txt) into the copyTO folder
